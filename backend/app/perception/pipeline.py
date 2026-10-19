@@ -5,6 +5,7 @@ from .vlm import detect_foods
 
 CONFIRM_BELOW = 0.6
 FUZZY_MIN = 0.75
+MIN_ALT_SCORE = 0.45
 DEFAULT_GRAMS = 100.0
 MAX_GRAMS = 1500.0
 
@@ -52,12 +53,13 @@ def analyze_image(raw: bytes) -> AnalysisResult:
         elif hits and hits[0]["score"] >= FUZZY_MIN:
             code, method = hits[0]["code"], "fuzzy"
 
-        alts = [h for h in hits if h["code"] != code][:3]
+        alts = [h for h in hits if h["code"] != code and h["score"] >= MIN_ALT_SCORE][:3]
         candidates.append(
             Candidate(
                 fct_code=code,
                 matched_name=str(get_food(code)["name_en"]) if code else None,
                 detected_name=it.name_en,
+                dish=it.dish,
                 grams=round(grams, 1),
                 confidence=round(conf, 2),
                 match_method=method,
@@ -65,4 +67,7 @@ def analyze_image(raw: bytes) -> AnalysisResult:
                 alternatives=[{"code": h["code"], "name_en": h["name_en"]} for h in alts],
             )
         )
-    return AnalysisResult(status="ok", candidates=candidates)
+
+    unmatched = sum(1 for c in candidates if c.fct_code is None)
+    msg = f"{unmatched} of {len(candidates)} items need your confirmation." if unmatched else ""
+    return AnalysisResult(status="ok", message=msg, candidates=candidates)

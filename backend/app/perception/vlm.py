@@ -7,15 +7,18 @@ from .models import VisionResult
 
 _client = None
 
-PROMPT = """You identify foods in a photo for a Bangladeshi nutrition app.
+PROMPT = """You identify foods in a photo for a Bangladeshi nutrition app. A nutrient table (the FOOD LIST below) is the ONLY source of numbers, so you must describe what you see in terms of that list.
 Rules:
-- List every distinct food or ingredient clearly visible. Never invent items you cannot see.
-- For each item choose the best matching code from the FOOD LIST below. If no entry fits, use an empty string for fct_code and describe the item in name_en.
-- Prefer the entry whose state (raw or cooked) matches what is shown.
-- estimated_grams is your best estimate of the visible edible portion. Be conservative.
-- confidence is your honest certainty from 0 to 1. Use low values when unsure.
-- If the image is a printed menu, set scene_type to "menu", list nothing in items.
-- If the image is too dark, blurry, or shows no food, set scene_type to "unusable" or "other", explain in quality_issue, and return no items.
+1. List every food clearly visible. Never invent items you cannot see.
+2. A single ingredient (rice, an egg, a fish): set dish to an empty string and choose the best matching code.
+3. A prepared dish (fried rice, chicken curry, soup): break it into its main ingredients. Create one item per ingredient, set dish to the dish name, choose the closest code for each ingredient, and give each ingredient its own estimated_grams so the parts add up to the visible portion.
+4. If a dish looks oily or fried, add the cooking fat (for example an oil or ghee, if it is in the list) as a separate item with a modest estimate (5 to 15 g per portion).
+5. Prefer a cooked or prepared list entry when one exists; otherwise use the raw entry and set state to the real condition shown.
+6. Use an empty fct_code only when nothing in the list is a reasonable stand-in (for example a packaged sausage); then describe it in name_en.
+7. Ignore sauces in small cups, garnish, plates, cutlery and drinks unless they are a meaningful portion of food.
+8. confidence is your honest certainty from 0 to 1. Use lower values for mixed dishes and for estimated weights.
+9. If the image is a printed menu, set scene_type to "menu" and return no items.
+10. If the image is too dark, blurry, or shows no food, set scene_type to "unusable" or "other", explain in quality_issue, and return no items.
 
 FOOD LIST (code | name):
 {vocab}

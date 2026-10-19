@@ -6,9 +6,10 @@ from pydantic import BaseModel, Field
 # ---- what the vision model returns ----
 class DetectedItem(BaseModel):
     fct_code: str = Field(description="Code from the provided FOOD LIST, or empty string if none fits")
-    name_en: str = Field(description="Plain English name of the food as seen")
+    name_en: str = Field(description="Plain English name of the food or ingredient")
     name_bn_roman: str = Field(description="Common Bangla name in Latin letters, or empty string")
-    estimated_grams: float = Field(description="Estimated edible weight in grams of the visible portion")
+    dish: str = Field(description="Name of the prepared dish this ingredient belongs to, or empty string if standalone")
+    estimated_grams: float = Field(description="Estimated edible weight in grams of this item in the visible portion")
     confidence: float = Field(description="Honest certainty from 0.0 to 1.0")
     state: Literal["raw", "cooked", "packaged", "unknown"]
 
@@ -24,6 +25,7 @@ class Candidate(BaseModel):
     fct_code: str | None
     matched_name: str | None
     detected_name: str
+    dish: str = ""
     grams: float
     confidence: float
     match_method: Literal["model_code", "fuzzy", "none"]
