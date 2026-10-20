@@ -71,7 +71,20 @@ with st.sidebar.expander("Customize"):
     sex = st.selectbox("Sex (used by the energy formula)", sexes,
                        index=sexes.index(base["sex"]), key=f"sex_{pkey}")
     weight = st.number_input("Weight (kg)", 35.0, 200.0, float(base["weight_kg"]), key=f"w_{pkey}")
-    height = st.number_input("Height (cm)", 130.0, 220.0, float(base["height_cm"]), key=f"h_{pkey}")
+    base_in = base["height_cm"] / 2.54
+    base_ft = int(base_in // 12)
+    base_inch = round((base_in - base_ft * 12) * 2) / 2   # nearest half inch
+    if base_inch >= 12:
+        base_ft, base_inch = base_ft + 1, 0.0
+    st.write("Height")
+    col_ft, col_in = st.columns(2)
+    ft = col_ft.number_input("Feet", 4, 7, base_ft, key=f"ft_{pkey}")
+    inch = col_in.number_input("Inches", 0.0, 11.5, float(base_inch), step=0.5, key=f"in_{pkey}")
+    height = (ft * 12 + inch) * 2.54
+    st.caption(f"= {height:.0f} cm")
+    if not 130.0 <= height <= 220.0:
+        st.error("Height must be between about 4 ft 4 in and 7 ft 2 in.")
+        st.stop()
     activities = ["sedentary", "light", "moderate", "active"]
     activity = st.selectbox("Activity", activities, index=activities.index(base["activity"]),
                             key=f"act_{pkey}")
@@ -231,13 +244,20 @@ if res:
         st.metric("Estimated cost of add-ons", f"{pv['total_cost_bdt']} BDT")
 
         target_by = {ln["nutrient"]: ln["meal_target"] for ln in lines}
-        focus = [n for n in rep["gaps"] if n in pv["after"] and target_by.get(n)]
+        fillable = {"protein_g", "fiber_g", "calcium_mg", "iron_mg",
+                    "vitamin_a_rae_mcg", "vitamin_c_mg", "folate_mcg"}
+        focus = [n for n in rep["gaps"] if n in fillable and n in pv["after"] and target_by.get(n)]
         if focus:
+            before_pct = [100 * pv["before"][n] / target_by[n] for n in focus]
+            added_pct = [100 * (pv["after"][n] - pv["before"][n]) / target_by[n] for n in focus]
             chart = pd.DataFrame({
-                "Before (%)": [100 * pv["before"][n] / target_by[n] for n in focus],
-                "After (%)": [100 * pv["after"][n] / target_by[n] for n in focus],
+                "Your meal (% of target)": before_pct,
+                "Added by shopping list (% of target)": added_pct,
             }, index=[LABEL.get(n, n) for n in focus])
             st.bar_chart(chart)
+            st.caption("The top of each bar is the total after adding the shopping list. "
+                       "100% = this meal's share of your daily target.")
+
         if pv["remaining_gaps"]:
             st.info("Still low after these add-ons: "
                     + ", ".join(LABEL.get(n, n) for n in pv["remaining_gaps"]))

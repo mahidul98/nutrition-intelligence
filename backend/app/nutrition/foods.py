@@ -6,13 +6,17 @@ from pathlib import Path
 import pandas as pd
 
 FOODS_CSV = Path(__file__).resolve().parents[3] / "data" / "processed" / "foods.csv"
+SUPPLEMENT_CSV = FOODS_CSV.parent / "supplement_foods.csv"
 
 
 @lru_cache(maxsize=1)
 def load_foods() -> pd.DataFrame:
-    df = pd.read_csv(
-        FOODS_CSV, encoding="utf-8-sig", dtype={"code": str, "food_group_code": str}
-    )
+    dtypes = {"code": str, "food_group_code": str}
+    df = pd.read_csv(FOODS_CSV, encoding="utf-8-sig", dtype=dtypes)
+    if SUPPLEMENT_CSV.exists():
+        extra = pd.read_csv(SUPPLEMENT_CSV, encoding="utf-8-sig", dtype=dtypes)
+        extra = extra.reindex(columns=df.columns)
+        df = pd.concat([df, extra], ignore_index=True)
     return df.set_index("code", drop=False)
 
 
