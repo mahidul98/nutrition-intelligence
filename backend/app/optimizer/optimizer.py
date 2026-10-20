@@ -27,10 +27,12 @@ def _result(status, before, notes, is_sample, remaining=None):
                        remaining_gaps=remaining or [], catalog_is_sample=is_sample, notes=notes)
 
 
-def _filter_catalog(catalog, profile: UserProfile) -> pd.DataFrame:
+def _filter_catalog(catalog, profile: UserProfile, exclude_codes=None) -> pd.DataFrame:
     if catalog is None or catalog.empty:
         return pd.DataFrame()
     cat = catalog[catalog["food_group_code"].isin(MAX_GRAMS.keys())]
+    if exclude_codes:
+        cat = cat[~cat["fct_code"].isin(exclude_codes)]
     if profile.diet == "vegetarian":
         cat = cat[~cat["food_group_code"].isin({"09", "10"})]
     elif profile.diet == "pescatarian":
@@ -44,7 +46,8 @@ def _filter_catalog(catalog, profile: UserProfile) -> pd.DataFrame:
 
 def plan_addons(totals: MealTotals, targets: DailyTargets, report: MealReport,
                 profile: UserProfile, meal: str = "lunch",
-                catalog=None, catalog_is_sample: bool = False) -> PivotResult:
+                                catalog=None, catalog_is_sample: bool = False,
+                exclude_codes: set[str] | None = None) -> PivotResult:
     share = MEAL_SHARE[meal]
     before = {n: round(totals.totals.get(n, 0.0), 2) for n in TRACKED}
     notes: list[str] = []
@@ -64,7 +67,7 @@ def plan_addons(totals: MealTotals, targets: DailyTargets, report: MealReport,
     if not gaps:
         return _result("nothing_needed", before, notes, catalog_is_sample)
 
-    cat = _filter_catalog(catalog, profile)
+    cat = _filter_catalog(catalog, profile, exclude_codes)
     if cat.empty:
         notes.append("No suitable in-stock foods with prices were found for this profile.")
         return _result("no_catalog", before, notes, catalog_is_sample, gaps)

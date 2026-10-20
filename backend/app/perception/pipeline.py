@@ -68,6 +68,18 @@ def analyze_image(raw: bytes) -> AnalysisResult:
             )
         )
 
+        # A prepared-dish entry (marked * in the table) already includes its cooking fat.
+    recipe_dishes = {
+        c.dish for c in candidates
+        if c.dish and c.fct_code and bool(get_food(c.fct_code)["is_recipe_calc"])
+    }
+    if recipe_dishes:
+        candidates = [
+            c for c in candidates
+            if not (c.dish in recipe_dishes and c.fct_code
+                    and str(get_food(c.fct_code)["food_group_code"]) == "13")
+        ]
+
     unmatched = sum(1 for c in candidates if c.fct_code is None)
     msg = f"{unmatched} of {len(candidates)} items need your confirmation." if unmatched else ""
     return AnalysisResult(status="ok", message=msg, candidates=candidates)

@@ -168,3 +168,19 @@ def test_dish_components_always_need_confirmation(monkeypatch):
         _item(fct_code="01_0001", name_en="rice", dish="fried rice", confidence=0.95),
     ]))
     assert pipeline.analyze_image(_png()).candidates[0].needs_confirmation
+def test_cooking_fat_dropped_when_dish_entry_already_includes_it(monkeypatch):
+    _patch(monkeypatch, VisionResult(scene_type="cooked_meal", quality_issue="", items=[
+        _item(fct_code="01_0036", name_en="Plain pulao", dish="Plain pulao", estimated_grams=250),
+        _item(fct_code="13_0004", name_en="Ghee", dish="Plain pulao", estimated_grams=10),
+    ]))
+    r = pipeline.analyze_image(_png())
+    assert [c.fct_code for c in r.candidates] == ["01_0036"]
+
+
+def test_cooking_fat_kept_when_dish_is_built_from_raw_ingredients(monkeypatch):
+    _patch(monkeypatch, VisionResult(scene_type="cooked_meal", quality_issue="", items=[
+        _item(fct_code="01_0024", name_en="rice", dish="fried rice", estimated_grams=150),
+        _item(fct_code="13_0012", name_en="soya oil", dish="fried rice", estimated_grams=10),
+    ]))
+    r = pipeline.analyze_image(_png())
+    assert [c.fct_code for c in r.candidates] == ["01_0024", "13_0012"]
