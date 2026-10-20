@@ -1,0 +1,14 @@
+fct_code,name_en,price_bdt,unit_grams,store,price_date,in_stock,note
+01_0024,rice (dev),80,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+02_0001,bengal gram (dev),150,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+02_0005,green gram (dev),160,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+02_0008,lentil (dev),130,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+03_0007,cabbage (dev),40,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+03_0008,carrot (dev),60,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+04_0007,beet greens (dev),40,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+04_0028,sweet potato leaves (dev),30,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+05_0005,potato (dev),50,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+08_0017,jackfruit (dev),60,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+09_0068,tilapia (dev),220,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+09_0033,hilsa (dev),1200,1000,DEV_SAMPLE,2026-10-20,yes,placeholder
+11_0001,egg (dev),140,660,DEV_SAMPLE,2026-10-20,yes,placeholder
