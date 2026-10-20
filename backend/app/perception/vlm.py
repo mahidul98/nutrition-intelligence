@@ -19,6 +19,7 @@ Rules:
 8. confidence is your honest certainty from 0 to 1. Use lower values for mixed dishes and for estimated weights.
 9. If the image is a printed menu, set scene_type to "menu" and return no items.
 10. If the image is too dark, blurry, or shows no food, set scene_type to "unusable" or "other", explain in quality_issue, and return no items.
+11. Never omit a main component of the meal (noodles, rice, bread, meat, fish). If no list entry is a reasonable stand-in, still return the item with an empty fct_code, its real name in name_en, and an estimated_grams, so the user can confirm it. If the closest list entry is a clearly different food, prefer the empty code to a wrong match.
 
 FOOD LIST (code | name):
 {vocab}

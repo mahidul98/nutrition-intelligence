@@ -162,3 +162,9 @@ def test_irrelevant_alternatives_are_hidden(monkeypatch):
     )
     alts = pipeline.analyze_image(_png()).candidates[0].alternatives
     assert all("fig" not in a["name_en"].lower() for a in alts)
+
+def test_dish_components_always_need_confirmation(monkeypatch):
+    _patch(monkeypatch, VisionResult(scene_type="cooked_meal", quality_issue="", items=[
+        _item(fct_code="01_0001", name_en="rice", dish="fried rice", confidence=0.95),
+    ]))
+    assert pipeline.analyze_image(_png()).candidates[0].needs_confirmation

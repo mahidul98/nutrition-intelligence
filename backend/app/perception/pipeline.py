@@ -63,7 +63,7 @@ def analyze_image(raw: bytes) -> AnalysisResult:
                 grams=round(grams, 1),
                 confidence=round(conf, 2),
                 match_method=method,
-                needs_confirmation=(conf < CONFIRM_BELOW) or method != "model_code" or defaulted,
+                needs_confirmation=(conf < CONFIRM_BELOW) or method != "model_code" or defaulted or bool(it.dish),
                 alternatives=[{"code": h["code"], "name_en": h["name_en"]} for h in alts],
             )
         )
