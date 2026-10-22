@@ -42,3 +42,4 @@ class MealReport(BaseModel):
     gaps: list[str]
     excesses: list[str]
     notes: list[str]
+    possible_gaps: list[str] = []

@@ -58,7 +58,7 @@ def plan_addons(totals: MealTotals, targets: DailyTargets, report: MealReport,
         notes.append("DEVELOPMENT SAMPLE PRICES - not real. Do not show these in the demo.")
 
     needs = {}
-    for g in report.gaps:
+    for g in list(report.gaps) + list(report.possible_gaps):
         if g in PROTECTIVE:
             need = COVERAGE * targets.targets[g].value * share - totals.totals.get(g, 0.0)
             if need > 1e-9:

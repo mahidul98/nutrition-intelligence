@@ -4,8 +4,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from backend.app.nutrition.engine import compute_meal  # noqa: E402
-from backend.app.schemas import MealItem  # noqa: E402
+from backend.app.nutrition.engine import compute_meal
+from backend.app.schemas import MealItem
 
 raw = Path(sys.argv[1]).read_bytes()
 # PowerShell's ">" often writes UTF-16, so handle both encodings

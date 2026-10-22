@@ -6,8 +6,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from backend.app.perception.pipeline import analyze_image
 from backend.app.nutrition.engine import compute_meal
+from backend.app.perception.pipeline import analyze_image
 from backend.app.schemas import MealItem
 
 

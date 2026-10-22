@@ -1,5 +1,4 @@
 import pandas as pd
-import pytest
 
 from backend.app.nutrition.engine import TRACKED, compute_meal
 from backend.app.optimizer.catalog import load_catalog

@@ -178,7 +178,7 @@ with st.expander("Add a food manually"):
         else:
             st.caption("No match found. Try another word.")
 
-use_rows = edited[(edited["use"] == True) & (edited["fct_code"].fillna("").astype(str) != "")]  # noqa: E712
+use_rows = edited[(edited["use"] == True) & (edited["fct_code"].fillna("").astype(str) != "")]
 unmatched = edited[edited["fct_code"].fillna("").astype(str) == ""]
 if len(unmatched):
     st.warning(f"{len(unmatched)} item(s) are not in the food table and will be skipped. "
@@ -207,6 +207,23 @@ if res:
     for c in res["diet_conflicts"]:
         st.warning(f"Diet conflict: {c['name_en']} {c['reason']}.")
 
+    for sw in res.get("swaps", []):
+        st.subheader(f"Swap for {sw['remove_name']}")
+        st.caption(f"Replaces {sw['remove_grams']:g} g, which gave about {sw['remove_protein_g']:g} g "
+                   "of protein. Weights are for the raw ingredient.")
+        if sw["options"]:
+            opt_df = pd.DataFrame([{
+                "Instead eat": o["name_en"], "Eat (g)": o["eat_grams"], "Buy (g)": o["buy_grams"],
+                "Cost (BDT)": o["cost_bdt"], "Protein added (g)": o["protein_added_g"],
+                "Covers (%)": int(o["covers_pct"]), "Energy change (kcal)": o["energy_change_kcal"],
+                "Store": o["store"],
+            } for o in sw["options"]])
+            st.dataframe(opt_df, hide_index=True)
+            if res["pivot"]["catalog_is_sample"]:
+                st.caption("Prices are development samples, not real prices.")
+        else:
+            st.info("No priced alternative was found for this profile.")
+
     energy = next((ln for ln in lines if ln["nutrient"] == "energy_kcal"), None)
     protein = next((ln for ln in lines if ln["nutrient"] == "protein_g"), None)
     m1, m2, m3 = st.columns(3)
@@ -217,6 +234,9 @@ if res:
         m2.metric("Protein", f"{protein['amount']} g", f"{int(protein['percent'])}% of meal target",
                   delta_color="off")
     m3.metric("Gaps found", len(rep["gaps"]))
+    if rep.get("possible_gaps"):
+        st.info("Possible gaps (some foods have no data for these, so we cannot confirm them): "
+                + ", ".join(LABEL.get(n, n) for n in rep["possible_gaps"]))
 
     table = pd.DataFrame([{
         "Nutrient": LABEL.get(ln["nutrient"], ln["nutrient"]),
@@ -227,6 +247,16 @@ if res:
     } for ln in lines])
     st.dataframe(table, hide_index=True)
     st.caption("* some foods have no data for this nutrient, so the total may be understated.")
+
+    trim = res.get("trim")
+    if trim:
+        st.subheader("Portion advice")
+        st.caption(f"This meal is about {trim['energy_before_pct']:.0f}% of your energy target for this meal.")
+        for t in trim["trims"]:
+            st.write(f"Reduce **{t['name_en']}** from {t['from_grams']:g} g to {t['to_grams']:g} g "
+                     f"(saves about {t['energy_saved_kcal']:g} kcal).")
+        st.caption(f"After this, the meal would be about {trim['energy_after_pct']:.0f}% "
+                   "of your energy target.")
 
     # ---- shopping list ----
     st.subheader("Shopping list to close the gaps")

@@ -1,7 +1,9 @@
 from .api_models import DietConflict, ReportRequest, ReportResponse
 from .nutrition.engine import compute_meal
 from .nutrition.foods import get_food
+from .optimizer.catalog import load_catalog
 from .optimizer.optimizer import plan_addons
+from .optimizer.pivot import plan_swaps, plan_trims
 from .personalization.models import UserProfile
 from .personalization.report import build_report
 from .personalization.targets import daily_targets
@@ -33,9 +35,21 @@ def run_report(req: ReportRequest) -> ReportResponse:
     totals = compute_meal(req.items)
     targets = daily_targets(req.profile)
     report = build_report(totals, targets, req.meal)
+
+    catalog, is_sample = load_catalog()
+    exclude = set(req.out_of_stock)
     pivot = plan_addons(totals, targets, report, req.profile, req.meal,
-                        exclude_codes=set(req.out_of_stock))
+                        catalog=catalog, catalog_is_sample=is_sample, exclude_codes=exclude)
+
+    conflicts = diet_conflicts(req.items, req.profile)
+    reasons: dict[str, str] = {}
+    for c in conflicts:
+        reasons.setdefault(c.fct_code, c.reason)
+
+    swaps = plan_swaps(totals, reasons, req.profile, catalog, exclude)
+    trim = plan_trims(totals, targets, req.profile, req.meal, set(reasons))
+
     return ReportResponse(
         totals=totals, targets=targets, report=report,
-        diet_conflicts=diet_conflicts(req.items, req.profile), pivot=pivot,
+        diet_conflicts=conflicts, pivot=pivot, swaps=swaps, trim=trim,
     )

@@ -22,6 +22,7 @@ def build_report(totals: MealTotals, targets: DailyTargets, meal: str = "lunch")
     lines: list[ReportLine] = []
     gaps: list[tuple[float, str]] = []
     excesses: list[str] = []
+    possible: list[tuple[float, str]] = []
     notes = [UNCOUNTED]
 
     for key, t in targets.targets.items():
@@ -35,6 +36,7 @@ def build_report(totals: MealTotals, targets: DailyTargets, meal: str = "lunch")
 
         if partial and status == "low":
             notes.append(f"{key}: {len(totals.unknown_by_nutrient[key])} item(s) have no data, so a gap cannot be confirmed.")
+            possible.append((pct, key))
         elif status == "low":
             gaps.append((pct, key))
         elif status == "high":
@@ -59,6 +61,7 @@ def build_report(totals: MealTotals, targets: DailyTargets, meal: str = "lunch")
         meal=meal,
         lines=lines,
         gaps=[k for _, k in sorted(gaps)],
+        possible_gaps=[k for _, k in sorted(possible)],
         excesses=excesses,
         notes=notes,
     )

@@ -4,12 +4,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from backend.app.nutrition.engine import compute_meal  # noqa: E402
-from backend.app.optimizer.optimizer import plan_addons  # noqa: E402
-from backend.app.personalization.models import UserProfile  # noqa: E402
-from backend.app.personalization.report import build_report  # noqa: E402
-from backend.app.personalization.targets import daily_targets  # noqa: E402
-from backend.app.schemas import MealItem  # noqa: E402
+from backend.app.nutrition.engine import compute_meal
+from backend.app.optimizer.optimizer import plan_addons
+from backend.app.personalization.models import UserProfile
+from backend.app.personalization.report import build_report
+from backend.app.personalization.targets import daily_targets
+from backend.app.schemas import MealItem
 
 PERSONAS = {
     "a": UserProfile(name="Student", age=21, sex="male", weight_kg=68, height_cm=172,

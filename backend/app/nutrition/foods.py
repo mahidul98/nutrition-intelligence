@@ -17,6 +17,8 @@ def load_foods() -> pd.DataFrame:
         extra = pd.read_csv(SUPPLEMENT_CSV, encoding="utf-8-sig", dtype=dtypes)
         extra = extra.reindex(columns=df.columns)
         df = pd.concat([df, extra], ignore_index=True)
+    group = df["food_group_code"].astype(str).str.strip().str.zfill(2)
+    df["food_group_code"] = group.where(df["food_group_code"].notna())
     return df.set_index("code", drop=False)
 
 

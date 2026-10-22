@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from .optimizer.models import PivotResult
+from .optimizer.models import PivotResult, Swap, TrimPlan
 from .personalization.models import DailyTargets, MealReport, UserProfile
 from .schemas import MealItem, MealTotals
 
@@ -26,3 +26,5 @@ class ReportResponse(BaseModel):
     report: MealReport
     diet_conflicts: list[DietConflict]
     pivot: PivotResult
+    swaps: list[Swap] = []
+    trim: TrimPlan | None = None
